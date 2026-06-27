@@ -26,12 +26,24 @@ else
   echo "METRIC build_time_s=0"
 fi
 
-# Step 5: If build worked, try running tests
-echo "METRIC tests_ok=0"
-echo "METRIC tests_count=0"
+# Step 5: Run tests — always run regardless of build (tests are independent)
+TESTS_EXIT=0
+TESTS_OUTPUT=$(npx vitest run 2>&1) || TESTS_EXIT=$?
+TESTS_PASSED=$(echo "$TESTS_OUTPUT" | grep -oE 'Tests\s+[0-9]+ passed' | grep -oE '[0-9]+' | head -1 || echo "0")
+if [ -z "$TESTS_PASSED" ]; then TESTS_PASSED="0"; fi
+
+if [ "$TESTS_EXIT" -eq 0 ]; then
+  echo "METRIC tests_ok=1"
+  echo "METRIC tests_count=$TESTS_PASSED"
+else
+  echo "METRIC tests_ok=0"
+  echo "METRIC tests_count=$TESTS_PASSED"
+fi
 
 # Print tail of build output for agent debugging
 echo "---BUILD_OUTPUT_TAIL---"
 echo "$BUILD_OUTPUT" | tail -15
+echo "---TESTS_OUTPUT_TAIL---"
+echo "$TESTS_OUTPUT" | tail -10
 echo "---INSTALL_OUTPUT_TAIL---"
 echo "$INSTALL_OUTPUT" | tail -10
