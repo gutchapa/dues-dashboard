@@ -1,14 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { getDues, getTotalPending, DuesStatus } from '@/lib/dues';
+import { useState, useCallback } from 'react';
+import { getDues, getTotalPending, addDues, markAsPaid, DuesStatus, DuesEntry } from '@/lib/dues';
 import { DuesList } from '@/components/DuesList';
 import { DuesFilter } from '@/components/DuesFilter';
+import { DuesForm } from '@/components/DuesForm';
 
-const allDues = getDues();
+function loadDues(): DuesEntry[] {
+  try { return getDues(); } catch { return []; }
+}
 
 export default function Home() {
   const [filter, setFilter] = useState<DuesStatus | 'all'>('all');
+  const [showForm, setShowForm] = useState(false);
+  const [allDues, setAllDues] = useState<DuesEntry[]>(loadDues);
 
   const filteredDues = filter === 'all' ? allDues : allDues.filter((d) => d.status === filter);
 
@@ -20,6 +25,17 @@ export default function Home() {
   };
 
   const totalPending = getTotalPending();
+
+  const handleAddDues = useCallback((data: { name: string; amount: number; dueDate: string; status: DuesStatus; category?: string; notes?: string }) => {
+    const newEntry = addDues(data);
+    setAllDues(getDues());
+    setShowForm(false);
+  }, []);
+
+  const handleMarkPaid = useCallback((id: string) => {
+    markAsPaid(id);
+    setAllDues(getDues());
+  }, []);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black">
@@ -54,9 +70,22 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 flex items-center justify-between gap-4">
           <DuesFilter current={filter} counts={counts} onChange={setFilter} />
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="shrink-0 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+          >
+            {showForm ? 'Cancel' : '+ Add Dues'}
+          </button>
         </div>
+
+        {showForm && (
+          <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
+            <h3 className="mb-4 text-sm font-semibold text-zinc-900 dark:text-zinc-50">New Dues Entry</h3>
+            <DuesForm onSubmit={handleAddDues} />
+          </div>
+        )}
 
         <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
           <div className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
@@ -65,7 +94,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="p-4">
-            <DuesList dues={filteredDues} />
+            <DuesList dues={filteredDues} onMarkPaid={handleMarkPaid} />
           </div>
         </div>
       </div>

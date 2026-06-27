@@ -4,6 +4,7 @@ import { DuesEntry } from '@/lib/dues';
 
 interface DuesListProps {
   dues: DuesEntry[];
+  onMarkPaid?: (id: string) => void;
 }
 
 const statusColors: Record<string, string> = {
@@ -17,7 +18,7 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function DuesList({ dues }: DuesListProps) {
+export function DuesList({ dues, onMarkPaid }: DuesListProps) {
   if (dues.length === 0) {
     return <p className="text-zinc-500 italic">No dues entries found.</p>;
   }
@@ -32,6 +33,7 @@ export function DuesList({ dues }: DuesListProps) {
             <th className="py-2 pr-4 font-medium">Due Date</th>
             <th className="py-2 pr-4 font-medium">Status</th>
             <th className="py-2 font-medium">Category</th>
+            {onMarkPaid && <th className="py-2 font-medium">Action</th>}
           </tr>
         </thead>
         <tbody>
@@ -46,6 +48,18 @@ export function DuesList({ dues }: DuesListProps) {
                 </span>
               </td>
               <td className="py-2">{entry.category ?? '—'}</td>
+              {onMarkPaid && (
+                <td className="py-2">
+                  {entry.status !== 'paid' && (
+                    <button
+                      onClick={() => onMarkPaid(entry.id)}
+                      className="rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800"
+                    >
+                      Mark Paid
+                    </button>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
