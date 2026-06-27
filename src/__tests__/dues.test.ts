@@ -9,6 +9,7 @@ import {
   updateDues,
   deleteDues,
   resetToDefaults,
+  getCategories,
   daysUntilDue,
   getDueDateLabel,
 } from '@/lib/dues';
@@ -78,6 +79,13 @@ describe('dues data layer', () => {
     dues.push({} as any);
     const duesAgain = getDues();
     expect(duesAgain.length).not.toBe(dues.length);
+  });
+
+  it('returns sorted unique categories', () => {
+    const cats = getCategories();
+    expect(cats).toContain('Housing');
+    expect(cats).toContain('Utilities');
+    expect(cats).toEqual(['Housing', 'Utilities']);
   });
 
   it('updates a dues entry fields', () => {

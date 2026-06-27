@@ -70,6 +70,11 @@ export function getDuesByStatus(status: DuesStatus): DuesEntry[] {
   return duesStore.filter((d) => d.status === status);
 }
 
+export function getCategories(): string[] {
+  const cats = new Set(duesStore.map((d) => d.category).filter((c): c is string => !!c));
+  return [...cats].sort();
+}
+
 export function addDues(entry: Omit<DuesEntry, 'id'>): DuesEntry {
   const newEntry: DuesEntry = { ...entry, id: String(Date.now()) };
   duesStore = [...duesStore, newEntry];

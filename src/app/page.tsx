@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { getDues, getDuesById, getTotalPending, addDues, updateDues, markAsPaid, deleteDues, DuesStatus, DuesEntry } from '@/lib/dues';
+import { getDues, getDuesById, getTotalPending, getCategories, addDues, updateDues, markAsPaid, deleteDues, DuesStatus, DuesEntry } from '@/lib/dues';
 import { DuesList } from '@/components/DuesList';
 import { DuesFilter } from '@/components/DuesFilter';
 import { DuesForm } from '@/components/DuesForm';
 import { DuesSearch } from '@/components/DuesSearch';
 import { DuesExport } from '@/components/DuesExport';
+import { CategoryFilter } from '@/components/CategoryFilter';
 
 function loadDues(): DuesEntry[] {
   try { return getDues(); } catch { return []; }
@@ -17,12 +18,16 @@ export default function Home() {
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [allDues, setAllDues] = useState<DuesEntry[]>(loadDues);
 
   const statusFiltered = filter === 'all' ? allDues : allDues.filter((d) => d.status === filter);
-  const filteredDues = searchQuery
-    ? statusFiltered.filter((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const categoryFiltered = categoryFilter
+    ? statusFiltered.filter((d) => d.category === categoryFilter)
     : statusFiltered;
+  const filteredDues = searchQuery
+    ? categoryFiltered.filter((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : categoryFiltered;
 
   const counts: Record<string, number> = {
     all: allDues.length,
@@ -132,10 +137,15 @@ export default function Home() {
           </div>
         )}
 
-        <div className="mb-4 flex items-center gap-4">
-          <div className="flex-1">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-[200px]">
             <DuesSearch value={searchQuery} onChange={setSearchQuery} />
           </div>
+          <CategoryFilter
+            categories={getCategories()}
+            selected={categoryFilter}
+            onChange={setCategoryFilter}
+          />
           <DuesExport dues={allDues} />
         </div>
 
