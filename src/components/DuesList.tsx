@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { DuesEntry } from '@/lib/dues';
+import { DuesEntry, getDueDateLabel } from '@/lib/dues';
 
 interface DuesListProps {
   dues: DuesEntry[];
@@ -86,6 +86,7 @@ export function DuesList({ dues, onMarkPaid, onDelete, onEdit }: DuesListProps) 
                 )}
               </th>
             ))}
+            <th className="py-2 pr-4 font-medium">Due</th>
             <th className="py-2 pr-4 font-medium">Category</th>
             {onMarkPaid && <th className="py-2 font-medium">Pay</th>}
             {onEdit && <th className="py-2 font-medium"></th>}
@@ -98,6 +99,23 @@ export function DuesList({ dues, onMarkPaid, onDelete, onEdit }: DuesListProps) 
               <td className="py-2 pr-4">{entry.name}</td>
               <td className="py-2 pr-4">${entry.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               <td className="py-2 pr-4">{formatDate(entry.dueDate)}</td>
+              <td className="py-2 pr-4">
+                {(() => {
+                  const { text, variant } = getDueDateLabel(entry);
+                  const colors: Record<string, string> = {
+                    overdue: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+                    'due-soon': 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+                    'due-today': 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
+                    future: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+                    paid: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+                  };
+                  return (
+                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${colors[variant]}`}>
+                      {text}
+                    </span>
+                  );
+                })()}
+              </td>
               <td className="py-2 pr-4">
                 <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[entry.status]}`}>
                   {entry.status}

@@ -9,6 +9,8 @@ import {
   updateDues,
   deleteDues,
   resetToDefaults,
+  daysUntilDue,
+  getDueDateLabel,
 } from '@/lib/dues';
 
 describe('dues data layer', () => {
@@ -144,6 +146,74 @@ describe('dues data layer', () => {
 
     it('exports resetToDefaults', () => {
       expect(typeof resetToDefaults).toBe('function');
+    });
+  });
+
+  describe('daysUntilDue', () => {
+    it('returns positive number for future date', () => {
+      const future = new Date();
+      future.setDate(future.getDate() + 10);
+      const iso = future.toISOString().slice(0, 10);
+      expect(daysUntilDue(iso)).toBeGreaterThanOrEqual(9);
+      expect(daysUntilDue(iso)).toBeLessThanOrEqual(11);
+    });
+
+    it('returns negative number for past date', () => {
+      const past = new Date();
+      past.setDate(past.getDate() - 5);
+      const iso = past.toISOString().slice(0, 10);
+      expect(daysUntilDue(iso)).toBeLessThanOrEqual(-4);
+      expect(daysUntilDue(iso)).toBeGreaterThanOrEqual(-6);
+    });
+
+    it('returns 0 for today in local timezone', () => {
+      const todayLocal = new Date();
+      const iso = todayLocal.getFullYear() + '-' +
+        String(todayLocal.getMonth() + 1).padStart(2, '0') + '-' +
+        String(todayLocal.getDate()).padStart(2, '0');
+      expect(daysUntilDue(iso)).toBe(0);
+    });
+  });
+
+  describe('getDueDateLabel', () => {
+    it('shows overdue for past due + pending', () => {
+      const label = getDueDateLabel({ id: 'x', name: 'Test', amount: 100, dueDate: '2020-01-01', status: 'pending' });
+      expect(label.variant).toBe('overdue');
+      expect(label.text).toMatch(/Overdue by \d+d/);
+    });
+
+    it('shows due today for today in local timezone', () => {
+      const todayLocal = new Date();
+      const iso = todayLocal.getFullYear() + '-' +
+        String(todayLocal.getMonth() + 1).padStart(2, '0') + '-' +
+        String(todayLocal.getDate()).padStart(2, '0');
+      const label = getDueDateLabel({ id: 'x', name: 'Test', amount: 100, dueDate: iso, status: 'pending' });
+      expect(label.variant).toBe('due-today');
+      expect(label.text).toBe('Due today');
+    });
+
+    it('shows due soon for 1-3 days', () => {
+      const future = new Date();
+      future.setDate(future.getDate() + 2);
+      const iso = future.toISOString().slice(0, 10);
+      const label = getDueDateLabel({ id: 'x', name: 'Test', amount: 100, dueDate: iso, status: 'pending' });
+      expect(label.variant).toBe('due-soon');
+      expect(label.text).toMatch(/Due in \dd/);
+    });
+
+    it('shows future for 4+ days', () => {
+      const future = new Date();
+      future.setDate(future.getDate() + 10);
+      const iso = future.toISOString().slice(0, 10);
+      const label = getDueDateLabel({ id: 'x', name: 'Test', amount: 100, dueDate: iso, status: 'pending' });
+      expect(label.variant).toBe('future');
+      expect(label.text).toMatch(/\d+d left/);
+    });
+
+    it('shows paid variant for paid entries', () => {
+      const label = getDueDateLabel({ id: 'x', name: 'Test', amount: 100, dueDate: '2026-07-01', status: 'paid' });
+      expect(label.variant).toBe('paid');
+      expect(label.text).toBe('Paid');
     });
   });
 });

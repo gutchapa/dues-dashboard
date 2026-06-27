@@ -162,4 +162,26 @@ describe('DuesList component', () => {
       expect(screen.getByText('▼')).toBeInTheDocument();
     });
   });
+
+  describe('due-date badges', () => {
+    it('shows Due column header', () => {
+      render(<DuesList dues={sampleDues} />);
+      expect(screen.getByText('Due')).toBeInTheDocument();
+    });
+
+    it('shows Paid badge for paid entries', () => {
+      render(<DuesList dues={sampleDues} />);
+      expect(screen.getAllByText('Paid').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('shows Overdue badge for overdue entry', () => {
+      render(<DuesList dues={sampleDues} />);
+      expect(screen.getByText(/^Overdue by \d+d$/)).toBeInTheDocument();
+    });
+
+    it('shows Xd left badge for future entry', () => {
+      render(<DuesList dues={sampleDues} />);
+      expect(screen.getByText(/^\d+d left$/)).toBeInTheDocument();
+    });
+  });
 });

@@ -96,3 +96,27 @@ export function deleteDues(id: string): boolean {
   persist();
   return true;
 }
+
+export function daysUntilDue(dueDate: string): number {
+  const due = new Date(dueDate + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffMs = due.getTime() - today.getTime();
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
+}
+
+export interface DueDateLabel {
+  text: string;
+  variant: 'overdue' | 'due-soon' | 'due-today' | 'future' | 'paid';
+}
+
+export function getDueDateLabel(entry: DuesEntry): DueDateLabel {
+  if (entry.status === 'paid') {
+    return { text: 'Paid', variant: 'paid' };
+  }
+  const days = daysUntilDue(entry.dueDate);
+  if (days < 0) return { text: `Overdue by ${Math.abs(days)}d`, variant: 'overdue' };
+  if (days === 0) return { text: 'Due today', variant: 'due-today' };
+  if (days <= 3) return { text: `Due in ${days}d`, variant: 'due-soon' };
+  return { text: `${days}d left`, variant: 'future' };
+}
