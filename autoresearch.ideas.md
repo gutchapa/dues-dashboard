@@ -1,7 +1,17 @@
 # Deferred Ideas
 
-- **MongoDB persistence** — mongoose is already in deps. Migrate in-memory store to MongoDB. High impact but risky (async, env vars needed).
-- **Search/filter by name** — text input to filter dues list by name. Moderate effort, high UX value.
-- **Edit dues entry** — inline or modal editing. Moderate effort.
-- **Delete dues entry** — simple button with confirmation. Low effort.
-- **Delete stale/explored entries periodically** so the backlog stays lean.
+## Implemented
+- ✅ Search/filter by name (DuesSearch component, 3 tests)
+- ✅ Edit dues entry (DuesForm edit mode, updateDues, 8 tests)
+- ✅ Delete dues entry (deleteDues, Delete button, 4 tests)
+- ✅ Column sorting (name/amount/date/status, asc/desc toggle, 6 tests)
+- ✅ Status filtering tabs (All/Pending/Overdue/Paid, 4 tests)
+- ✅ Add dues form with validation (DuesForm, 5 tests)
+- ✅ Mark as paid button (in DuesList, 4 tests)
+
+## Future
+- **LocalStorage persistence** — save/load dues from localStorage so data survives page refresh
+- **MongoDB persistence** — mongoose already in deps. Requires API routes, env vars, async refactoring
+- **Data export** — download dues as CSV or JSON file
+- **Pagination** — for large numbers of dues entries
+- **Dark mode toggle** — manual toggle (currently follows system preference)

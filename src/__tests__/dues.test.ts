@@ -8,9 +8,15 @@ import {
   markAsPaid,
   updateDues,
   deleteDues,
+  resetToDefaults,
 } from '@/lib/dues';
 
 describe('dues data layer', () => {
+  beforeEach(() => {
+    resetToDefaults();
+    localStorage.clear();
+  });
+
   it('returns all dues entries', () => {
     const dues = getDues();
     expect(dues).toHaveLength(3);
@@ -97,5 +103,47 @@ describe('dues data layer', () => {
   it('returns false when deleting nonexistent entry', () => {
     const result = deleteDues('nonexistent');
     expect(result).toBe(false);
+  });
+
+  describe('persistence', () => {
+    it('saves new entry to localStorage', () => {
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+
+      addDues({ name: 'Persisted Bill', amount: 99, dueDate: '2026-09-01', status: 'pending' });
+
+      expect(setItemSpy).toHaveBeenCalledWith(
+        'dues-dashboard-data',
+        expect.stringContaining('Persisted Bill')
+      );
+
+      setItemSpy.mockRestore();
+    });
+
+    it('persists after update', () => {
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+
+      updateDues('1', { amount: 2000 });
+
+      expect(setItemSpy).toHaveBeenCalledWith(
+        'dues-dashboard-data',
+        expect.stringContaining('"amount":2000')
+      );
+
+      setItemSpy.mockRestore();
+    });
+
+    it('persists after delete', () => {
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+
+      deleteDues('1');
+
+      expect(setItemSpy).toHaveBeenCalledWith('dues-dashboard-data', expect.any(String));
+
+      setItemSpy.mockRestore();
+    });
+
+    it('exports resetToDefaults', () => {
+      expect(typeof resetToDefaults).toBe('function');
+    });
   });
 });
