@@ -61,4 +61,18 @@ Outputs `METRIC name=value` lines.
 3. **Tailwind v4 config**: `tailwind.config.js` uses old v3 `module.exports` format, while `globals.css` uses new v4 `@import "tailwindcss"` syntax
 
 ## What's Been Tried
-*(Initially empty — filled as experiments accumulate)*
+
+### Iteration 1 — ✅ SUCCESS: Build passes
+- **Problem**: npm install failed — eslint@8 incompatible with eslint-config-next@16 (needs >=9); @tailwindcss/postcss not installed
+- **Fix**: Upgraded eslint `^8`→`^9`, added `@tailwindcss/postcss ^4`
+- **Result**: Build passes in ~2.1s
+
+### Iteration 2 — ✅ SUCCESS: Tests added & passing
+- **Added**: vitest, @testing-library/react, @testing-library/jest-dom, jsdom
+- **Added**: 2 tests (home page renders, layout exports metadata)
+- **Result**: All tests pass
+
+## Final State
+- ✅ Build passes
+- ✅ 2 test cases pass
+- ✅ App is working
