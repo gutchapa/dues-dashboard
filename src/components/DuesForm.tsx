@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DuesStatus } from '@/lib/dues';
+import { DuesEntry, DuesStatus } from '@/lib/dues';
 
 interface DuesFormData {
   name: string;
@@ -20,6 +20,8 @@ interface DuesFormProps {
     category?: string;
     notes?: string;
   }) => void;
+  initialData?: DuesEntry;
+  submitLabel?: string;
 }
 
 interface FormErrors {
@@ -28,13 +30,13 @@ interface FormErrors {
   dueDate?: string;
 }
 
-export function DuesForm({ onSubmit }: DuesFormProps) {
+export function DuesForm({ onSubmit, initialData, submitLabel }: DuesFormProps) {
   const [formData, setFormData] = useState<DuesFormData>({
-    name: '',
-    amount: '',
-    dueDate: '',
-    category: '',
-    notes: '',
+    name: initialData?.name ?? '',
+    amount: initialData ? String(initialData.amount) : '',
+    dueDate: initialData?.dueDate ?? '',
+    category: initialData?.category ?? '',
+    notes: initialData?.notes ?? '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -57,12 +59,14 @@ export function DuesForm({ onSubmit }: DuesFormProps) {
       name: formData.name.trim(),
       amount: parseFloat(formData.amount),
       dueDate: formData.dueDate,
-      status: 'pending',
+      status: initialData?.status ?? 'pending',
       category: formData.category.trim() || undefined,
       notes: formData.notes.trim() || undefined,
     });
 
-    setFormData({ name: '', amount: '', dueDate: '', category: '', notes: '' });
+    if (!initialData) {
+      setFormData({ name: '', amount: '', dueDate: '', category: '', notes: '' });
+    }
   }
 
   function setField(field: keyof DuesFormData, value: string) {
@@ -144,7 +148,7 @@ export function DuesForm({ onSubmit }: DuesFormProps) {
         type="submit"
         className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
       >
-        Add Dues Entry
+        {submitLabel ?? (initialData ? 'Save Changes' : 'Add Dues Entry')}
       </button>
     </form>
   );

@@ -74,4 +74,59 @@ describe('DuesForm component', () => {
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Rent' } });
     expect(screen.queryByText('Name is required')).not.toBeInTheDocument();
   });
+
+  describe('edit mode', () => {
+    const editData = {
+      id: '5',
+      name: 'Existing Bill',
+      amount: 200,
+      dueDate: '2026-08-01',
+      status: 'pending' as const,
+      category: 'Utilities',
+    };
+
+    it('pre-fills form with initial data', () => {
+      const onSubmit = vi.fn();
+      render(<DuesForm onSubmit={onSubmit} initialData={editData} />);
+
+      const nameInput = screen.getByLabelText('Name') as HTMLInputElement;
+      const amountInput = screen.getByLabelText('Amount ($)') as HTMLInputElement;
+
+      expect(nameInput.value).toBe('Existing Bill');
+      expect(amountInput.value).toBe('200');
+    });
+
+    it('shows Save Changes button in edit mode', () => {
+      const onSubmit = vi.fn();
+      render(<DuesForm onSubmit={onSubmit} initialData={editData} />);
+
+      expect(screen.getByText('Save Changes')).toBeInTheDocument();
+      expect(screen.queryByText('Add Dues Entry')).not.toBeInTheDocument();
+    });
+
+    it('submits with edited values', () => {
+      const onSubmit = vi.fn();
+      render(<DuesForm onSubmit={onSubmit} initialData={editData} />);
+
+      const nameInput = screen.getByLabelText('Name');
+      fireEvent.change(nameInput, { target: { value: 'Updated Bill' } });
+      fireEvent.click(screen.getByText('Save Changes'));
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+        name: 'Updated Bill',
+        amount: 200,
+      }));
+    });
+
+    it('preserves original status on edit submit', () => {
+      const onSubmit = vi.fn();
+      render(<DuesForm onSubmit={onSubmit} initialData={editData} />);
+
+      fireEvent.click(screen.getByText('Save Changes'));
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+        status: 'pending',
+      }));
+    });
+  });
 });

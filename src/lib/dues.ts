@@ -64,11 +64,15 @@ export function addDues(entry: Omit<DuesEntry, 'id'>): DuesEntry {
   return newEntry;
 }
 
-export function markAsPaid(id: string): boolean {
+export function updateDues(id: string, updates: Partial<Omit<DuesEntry, 'id'>>): boolean {
   const entry = duesStore.find((d) => d.id === id);
   if (!entry) return false;
-  entry.status = 'paid';
+  Object.assign(entry, updates);
   return true;
+}
+
+export function markAsPaid(id: string): boolean {
+  return updateDues(id, { status: 'paid' });
 }
 
 export function deleteDues(id: string): boolean {

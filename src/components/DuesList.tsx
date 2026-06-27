@@ -7,6 +7,7 @@ interface DuesListProps {
   dues: DuesEntry[];
   onMarkPaid?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
 }
 
 type SortKey = 'name' | 'amount' | 'dueDate' | 'status';
@@ -41,7 +42,7 @@ const columns: { key: SortKey; label: string }[] = [
   { key: 'status', label: 'Status' },
 ];
 
-export function DuesList({ dues, onMarkPaid, onDelete }: DuesListProps) {
+export function DuesList({ dues, onMarkPaid, onDelete, onEdit }: DuesListProps) {
   const [sortKey, setSortKey] = useState<SortKey>('dueDate');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
@@ -87,6 +88,7 @@ export function DuesList({ dues, onMarkPaid, onDelete }: DuesListProps) {
             ))}
             <th className="py-2 pr-4 font-medium">Category</th>
             {onMarkPaid && <th className="py-2 font-medium">Pay</th>}
+            {onEdit && <th className="py-2 font-medium"></th>}
             {onDelete && <th className="py-2 font-medium"></th>}
           </tr>
         </thead>
@@ -112,6 +114,16 @@ export function DuesList({ dues, onMarkPaid, onDelete }: DuesListProps) {
                       Mark Paid
                     </button>
                   )}
+                </td>
+              )}
+              {onEdit && (
+                <td className="py-2 pr-1">
+                  <button
+                    onClick={() => onEdit(entry.id)}
+                    className="rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200 transition-colors dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600"
+                  >
+                    Edit
+                  </button>
                 </td>
               )}
               {onDelete && (

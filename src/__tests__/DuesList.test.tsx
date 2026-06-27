@@ -70,6 +70,22 @@ describe('DuesList component', () => {
     expect(screen.queryByText('Pay')).not.toBeInTheDocument();
   });
 
+  it('shows Edit button when onEdit is provided', () => {
+    const onEdit = vi.fn();
+    render(<DuesList dues={sampleDues} onEdit={onEdit} />);
+
+    const buttons = screen.getAllByText('Edit');
+    expect(buttons).toHaveLength(3);
+  });
+
+  it('calls onEdit with entry id when clicked', () => {
+    const onEdit = vi.fn();
+    render(<DuesList dues={sampleDues} onEdit={onEdit} />);
+
+    fireEvent.click(screen.getAllByText('Edit')[0]);
+    expect(onEdit).toHaveBeenCalledWith('2'); // first sorted by dueDate asc
+  });
+
   it('shows delete buttons when onDelete is provided', () => {
     const onDelete = vi.fn();
     render(<DuesList dues={sampleDues} onDelete={onDelete} />);

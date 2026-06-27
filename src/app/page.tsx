@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { getDues, getTotalPending, addDues, markAsPaid, deleteDues, DuesStatus, DuesEntry } from '@/lib/dues';
+import { getDues, getDuesById, getTotalPending, addDues, updateDues, markAsPaid, deleteDues, DuesStatus, DuesEntry } from '@/lib/dues';
 import { DuesList } from '@/components/DuesList';
 import { DuesFilter } from '@/components/DuesFilter';
 import { DuesForm } from '@/components/DuesForm';
@@ -15,6 +15,7 @@ export default function Home() {
   const [filter, setFilter] = useState<DuesStatus | 'all'>('all');
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [allDues, setAllDues] = useState<DuesEntry[]>(loadDues);
 
   const statusFiltered = filter === 'all' ? allDues : allDues.filter((d) => d.status === filter);
@@ -45,6 +46,24 @@ export default function Home() {
   const handleDelete = useCallback((id: string) => {
     deleteDues(id);
     setAllDues(getDues());
+  }, []);
+
+  const editingEntry = editingId ? getDuesById(editingId) ?? undefined : undefined;
+
+  const handleEdit = useCallback((id: string) => {
+    setEditingId(id);
+    setShowForm(false);
+  }, []);
+
+  const handleUpdate = useCallback((data: { name: string; amount: number; dueDate: string; status: DuesStatus; category?: string; notes?: string }) => {
+    if (!editingId) return;
+    updateDues(editingId, data);
+    setAllDues(getDues());
+    setEditingId(null);
+  }, [editingId]);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingId(null);
   }, []);
 
   return (
@@ -97,6 +116,21 @@ export default function Home() {
           </div>
         )}
 
+        {editingEntry && (
+          <div className="mb-6 rounded-lg border border-blue-200 bg-white p-4 dark:border-blue-800 dark:bg-zinc-900">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Edit Dues Entry</h3>
+              <button
+                onClick={handleCancelEdit}
+                className="text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              >
+                Cancel
+              </button>
+            </div>
+            <DuesForm onSubmit={handleUpdate} initialData={editingEntry} />
+          </div>
+        )}
+
         <div className="mb-4">
           <DuesSearch value={searchQuery} onChange={setSearchQuery} />
         </div>
@@ -108,7 +142,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="p-4">
-            <DuesList dues={filteredDues} onMarkPaid={handleMarkPaid} onDelete={handleDelete} />
+            <DuesList dues={filteredDues} onMarkPaid={handleMarkPaid} onDelete={handleDelete} onEdit={handleEdit} />
           </div>
         </div>
       </div>

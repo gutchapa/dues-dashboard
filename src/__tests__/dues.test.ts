@@ -6,6 +6,7 @@ import {
   getDuesByStatus,
   addDues,
   markAsPaid,
+  updateDues,
   deleteDues,
 } from '@/lib/dues';
 
@@ -69,6 +70,21 @@ describe('dues data layer', () => {
     dues.push({} as any);
     const duesAgain = getDues();
     expect(duesAgain.length).not.toBe(dues.length);
+  });
+
+  it('updates a dues entry fields', () => {
+    const result = updateDues('1', { name: 'Apartment Rent', amount: 1600 });
+    expect(result).toBe(true);
+    const entry = getDuesById('1');
+    expect(entry!.name).toBe('Apartment Rent');
+    expect(entry!.amount).toBe(1600);
+    // Unchanged fields preserved
+    expect(entry!.status).toBeDefined();
+  });
+
+  it('returns false when updating nonexistent entry', () => {
+    const result = updateDues('nonexistent', { name: 'Test' });
+    expect(result).toBe(false);
   });
 
   it('deletes a dues entry', () => {
