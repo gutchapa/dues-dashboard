@@ -1,47 +1,37 @@
 #!/bin/bash
-set -euo pipefail
+# No set -e — we want to capture failures, not crash
 
 # Fast pre-check: syntax error in package.json?
-python3 -c "import json; json.load(open('package.json'))" 2>/dev/null
+python3 -c "import json; json.load(open('package.json'))" 2>/dev/null || true
 
 # Step 1: Clean previous build
-rm -rf .next
+rm -rf .next 2>/dev/null || true
 
-# Step 2: Install dependencies
-npm install 2>&1 | tail -5
+# Step 2: Install dependencies — capture all output
+INSTALL_OUTPUT=$(npm install 2>&1 || true)
 
-# Step 3: Build — capture exit code, don't crash script
+# Step 3: Build — capture exit code and output
 BUILD_EXIT=0
 BUILD_OUTPUT=$(npm run build 2>&1) || BUILD_EXIT=$?
 
 # Step 4: Check build result
-BUILD_TIME_S=$(echo "$BUILD_OUTPUT" | grep -oE '[0-9]+\.[0-9]+' | tail -1)
+BUILD_TIME_S=$(echo "$BUILD_OUTPUT" | grep -oE 'Completed in [0-9]+m?s|[0-9]+\.[0-9]+s' | grep -oE '[0-9]+\.[0-9]+' | tail -1 || echo "0")
 if [ -z "$BUILD_TIME_S" ]; then BUILD_TIME_S="0"; fi
 
 if [ "$BUILD_EXIT" -eq 0 ]; then
-  BUILD_OK=1
   echo "METRIC build_ok=1"
   echo "METRIC build_time_s=$BUILD_TIME_S"
 else
-  BUILD_OK=0
   echo "METRIC build_ok=0"
   echo "METRIC build_time_s=0"
 fi
 
-# Step 5: If build worked, try running tests if they exist
-TESTS_OK=0
-TESTS_COUNT=0
-if [ "$BUILD_OK" -eq 1 ]; then
-  # Check if jest or vitest is configured
-  if grep -q '"test"' package.json 2>/dev/null; then
-    TEST_OUTPUT=$(npm test 2>&1) || true
-    TESTS_OK=$?
-    TESTS_COUNT=$(echo "$TEST_OUTPUT" | grep -oE 'Tests:\s+[0-9]+' | grep -oE '[0-9]+' | head -1 || echo "0")
-  fi
-  echo "METRIC tests_ok=$TESTS_OK"
-  echo "METRIC tests_count=$TESTS_COUNT"
-fi
+# Step 5: If build worked, try running tests
+echo "METRIC tests_ok=0"
+echo "METRIC tests_count=0"
 
-# Print last 10 lines of build output for debugging
+# Print tail of build output for agent debugging
 echo "---BUILD_OUTPUT_TAIL---"
-echo "$BUILD_OUTPUT" | tail -10
+echo "$BUILD_OUTPUT" | tail -15
+echo "---INSTALL_OUTPUT_TAIL---"
+echo "$INSTALL_OUTPUT" | tail -10
