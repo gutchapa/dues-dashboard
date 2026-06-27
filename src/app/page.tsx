@@ -6,6 +6,7 @@ import { DuesList } from '@/components/DuesList';
 import { DuesFilter } from '@/components/DuesFilter';
 import { DuesForm } from '@/components/DuesForm';
 import { DuesSearch } from '@/components/DuesSearch';
+import { DuesExport } from '@/components/DuesExport';
 
 function loadDues(): DuesEntry[] {
   try { return getDues(); } catch { return []; }
@@ -131,8 +132,11 @@ export default function Home() {
           </div>
         )}
 
-        <div className="mb-4">
-          <DuesSearch value={searchQuery} onChange={setSearchQuery} />
+        <div className="mb-4 flex items-center gap-4">
+          <div className="flex-1">
+            <DuesSearch value={searchQuery} onChange={setSearchQuery} />
+          </div>
+          <DuesExport dues={allDues} />
         </div>
 
         <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
