@@ -49,24 +49,85 @@ describe('DuesList component', () => {
     const onMarkPaid = vi.fn();
     render(<DuesList dues={sampleDues} onMarkPaid={onMarkPaid} />);
 
-    // Go through rows — paid entry row shouldn't have the button
     const rows = screen.getAllByRole('row');
-    // The table has 4 rows: header + 3 data rows
-    // Netflix (paid) row shouldn't contain 'Mark Paid'
-    const netflixRow = rows[3];
-    expect(netflixRow.textContent).not.toContain('Mark Paid');
+    // Default sort is dueDate asc: Electricity(6/15), Netflix(6/28), Rent(7/1)
+    // Netflix row (index 2, 0-indexed: 0=header, 1=Electricity, 2=Netflix, 3=Rent)
+    expect(rows[2].textContent).toContain('Netflix');
+    expect(rows[2].textContent).not.toContain('Mark Paid');
   });
 
   it('calls onMarkPaid with entry id when clicked', () => {
     const onMarkPaid = vi.fn();
     render(<DuesList dues={sampleDues} onMarkPaid={onMarkPaid} />);
 
+    // First Mark Paid button is for Electricity (id: 2) — sorted by dueDate asc
     fireEvent.click(screen.getAllByText('Mark Paid')[0]);
-    expect(onMarkPaid).toHaveBeenCalledWith('1');
+    expect(onMarkPaid).toHaveBeenCalledWith('2');
   });
 
   it('does not show Action column when onMarkPaid is not provided', () => {
     render(<DuesList dues={sampleDues} />);
     expect(screen.queryByText('Action')).not.toBeInTheDocument();
+  });
+
+  describe('sorting', () => {
+    it('shows sort indicators on column headers', () => {
+      render(<DuesList dues={sampleDues} />);
+      const nameHeader = screen.getByText('Name');
+      const amountHeader = screen.getByText('Amount');
+      const dateHeader = screen.getByText('Due Date');
+      const statusHeader = screen.getByText('Status');
+
+      expect(nameHeader).toBeInTheDocument();
+      expect(amountHeader).toBeInTheDocument();
+      expect(dateHeader).toBeInTheDocument();
+      expect(statusHeader).toBeInTheDocument();
+    });
+
+    it('sorts by amount ascending when clicking Amount header', () => {
+      render(<DuesList dues={sampleDues} />);
+
+      fireEvent.click(screen.getByText('Amount'));
+
+      const rows = screen.getAllByRole('row');
+      // After sort asc by amount: Netflix($15.99), Electricity($120), Rent($1500)
+      expect(rows[1].textContent).toContain('Netflix');
+      expect(rows[2].textContent).toContain('Electricity');
+      expect(rows[3].textContent).toContain('Rent');
+    });
+
+    it('reverses sort order when clicking same header twice', () => {
+      render(<DuesList dues={sampleDues} />);
+
+      fireEvent.click(screen.getByText('Amount'));
+      fireEvent.click(screen.getByText('Amount'));
+
+      const rows = screen.getAllByRole('row');
+      // After sort desc by amount: Rent($1500), Electricity($120), Netflix($15.99)
+      expect(rows[1].textContent).toContain('Rent');
+      expect(rows[3].textContent).toContain('Netflix');
+    });
+
+    it('sorts by name alphabetically', () => {
+      render(<DuesList dues={sampleDues} />);
+
+      fireEvent.click(screen.getByText('Name'));
+
+      const rows = screen.getAllByRole('row');
+      expect(rows[1].textContent).toContain('Electricity');
+      expect(rows[2].textContent).toContain('Netflix');
+      expect(rows[3].textContent).toContain('Rent');
+    });
+
+    it('shows sort arrow on active column (default: Due Date asc)', () => {
+      render(<DuesList dues={sampleDues} />);
+      expect(screen.getByText('▲')).toBeInTheDocument();
+    });
+
+    it('shows descending arrow after second click', () => {
+      render(<DuesList dues={sampleDues} />);
+      fireEvent.click(screen.getByText('Due Date'));
+      expect(screen.getByText('▼')).toBeInTheDocument();
+    });
   });
 });
