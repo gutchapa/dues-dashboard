@@ -22,6 +22,7 @@ No hard termination — loop continues indefinitely, adding features and tests. 
 
 ## Metrics
 - **Primary**: `test_count` (unitless, higher is better) — number of passing tests (proxy for feature completeness + quality)
+  - **Current best**: 56 (from 2 baseline = +2700%)
 - **Secondary**: `build_ok` (0 or 1, higher is better) — must stay at 1
 - **Secondary**: `build_time_s` (lower is better) — must not regress significantly
 
@@ -65,4 +66,68 @@ Outputs `METRIC name=value` lines.
 - **Result**: 2 tests pass
 
 ## What's Been Tried (Phase 2 — Features)
-*(Filled as experiments accumulate)*
+
+### Iteration 3 — ✅ Data layer + display component
+- **Added**: `src/lib/dues.ts` with types, CRUD functions, seed data
+- **Added**: `DuesList` component with table, status badges, empty state
+- **Added**: 9 data tests + 4 component tests
+- **Result**: 15 total tests
+
+### Iteration 4 — ✅ Status filtering tabs
+- **Added**: `DuesFilter` component with All/Pending/Overdue/Paid tabs + count badges
+- **Added**: 4 tests
+- **Result**: 19 total tests
+
+### Iteration 5 — ✅ Add dues form with validation
+- **Added**: `DuesForm` component with name, amount, date validation
+- **Added**: 5 tests (validation, submit, clear, error clearing)
+- **Result**: 24 total tests
+
+### Iteration 6 — ✅ Mark paid + form integration
+- **Added**: Mark Paid button in DuesList, form toggling in home page
+- **Added**: 4 tests
+- **Result**: 28 total tests
+
+### Iteration 7 — ✅ Column sorting
+- **Added**: Clickable headers for name/amount/date/status, asc/desc toggle
+- **Added**: 6 tests
+- **Result**: 34 total tests
+
+### Iteration 8 — ✅ Search by name
+- **Added**: `DuesSearch` component with case-insensitive name filtering
+- **Added**: 3 tests
+- **Result**: 37 total tests
+
+### Iteration 9 — ✅ Delete
+- **Added**: deleteDues function, Delete button in DuesList
+- **Added**: 4 tests
+- **Result**: 41 total tests
+
+### Iteration 10 — ✅ Edit
+- **Added**: updateDues, DuesForm edit mode (initialData), Edit button
+- **Added**: 8 tests
+- **Build fix**: Missing getDuesById import (type error)
+- **Result**: 49 total tests
+
+### Iteration 11 — ✅ localStorage persistence
+- **Added**: Save/load dues from localStorage, resetToDefaults
+- **Added**: 4 tests
+- **Result**: 53 total tests
+
+### Iteration 12 — ✅ Data export
+- **Added**: DuesExport component with JSON and CSV download
+- **Added**: 3 tests
+- **Result**: 56 total tests
+
+## Final State
+- ✅ Build passes
+- ✅ 56 tests pass (14 test files)
+- ✅ Full CRUD (Create, Read, Update, Delete)
+- ✅ Status filtering tabs
+- ✅ Column sorting (asc/desc)
+- ✅ Search by name
+- ✅ Inline Mark Paid
+- ✅ Edit any entry
+- ✅ localStorage persistence
+- ✅ JSON and CSV export
+- ✅ 11 components, 1 data module, 6 test files
