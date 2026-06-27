@@ -6,6 +6,7 @@ import { DuesEntry } from '@/lib/dues';
 interface DuesListProps {
   dues: DuesEntry[];
   onMarkPaid?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 type SortKey = 'name' | 'amount' | 'dueDate' | 'status';
@@ -40,7 +41,7 @@ const columns: { key: SortKey; label: string }[] = [
   { key: 'status', label: 'Status' },
 ];
 
-export function DuesList({ dues, onMarkPaid }: DuesListProps) {
+export function DuesList({ dues, onMarkPaid, onDelete }: DuesListProps) {
   const [sortKey, setSortKey] = useState<SortKey>('dueDate');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
@@ -85,7 +86,8 @@ export function DuesList({ dues, onMarkPaid }: DuesListProps) {
               </th>
             ))}
             <th className="py-2 pr-4 font-medium">Category</th>
-            {onMarkPaid && <th className="py-2 font-medium">Action</th>}
+            {onMarkPaid && <th className="py-2 font-medium">Pay</th>}
+            {onDelete && <th className="py-2 font-medium"></th>}
           </tr>
         </thead>
         <tbody>
@@ -110,6 +112,16 @@ export function DuesList({ dues, onMarkPaid }: DuesListProps) {
                       Mark Paid
                     </button>
                   )}
+                </td>
+              )}
+              {onDelete && (
+                <td className="py-2">
+                  <button
+                    onClick={() => onDelete(entry.id)}
+                    className="rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 hover:bg-red-200 transition-colors dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800"
+                  >
+                    Delete
+                  </button>
                 </td>
               )}
             </tr>

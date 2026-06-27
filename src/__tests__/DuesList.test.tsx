@@ -65,9 +65,25 @@ describe('DuesList component', () => {
     expect(onMarkPaid).toHaveBeenCalledWith('2');
   });
 
-  it('does not show Action column when onMarkPaid is not provided', () => {
+  it('does not show Pay column when onMarkPaid is not provided', () => {
     render(<DuesList dues={sampleDues} />);
-    expect(screen.queryByText('Action')).not.toBeInTheDocument();
+    expect(screen.queryByText('Pay')).not.toBeInTheDocument();
+  });
+
+  it('shows delete buttons when onDelete is provided', () => {
+    const onDelete = vi.fn();
+    render(<DuesList dues={sampleDues} onDelete={onDelete} />);
+
+    const buttons = screen.getAllByText('Delete');
+    expect(buttons).toHaveLength(3);
+  });
+
+  it('calls onDelete with entry id when clicked', () => {
+    const onDelete = vi.fn();
+    render(<DuesList dues={sampleDues} onDelete={onDelete} />);
+
+    fireEvent.click(screen.getAllByText('Delete')[0]);
+    expect(onDelete).toHaveBeenCalledWith('2'); // first entry sorted by dueDate asc
   });
 
   describe('sorting', () => {

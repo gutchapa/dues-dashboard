@@ -70,3 +70,10 @@ export function markAsPaid(id: string): boolean {
   entry.status = 'paid';
   return true;
 }
+
+export function deleteDues(id: string): boolean {
+  const idx = duesStore.findIndex((d) => d.id === id);
+  if (idx === -1) return false;
+  duesStore = [...duesStore.slice(0, idx), ...duesStore.slice(idx + 1)];
+  return true;
+}

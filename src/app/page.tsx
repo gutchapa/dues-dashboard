@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { getDues, getTotalPending, addDues, markAsPaid, DuesStatus, DuesEntry } from '@/lib/dues';
+import { getDues, getTotalPending, addDues, markAsPaid, deleteDues, DuesStatus, DuesEntry } from '@/lib/dues';
 import { DuesList } from '@/components/DuesList';
 import { DuesFilter } from '@/components/DuesFilter';
 import { DuesForm } from '@/components/DuesForm';
@@ -39,6 +39,11 @@ export default function Home() {
 
   const handleMarkPaid = useCallback((id: string) => {
     markAsPaid(id);
+    setAllDues(getDues());
+  }, []);
+
+  const handleDelete = useCallback((id: string) => {
+    deleteDues(id);
     setAllDues(getDues());
   }, []);
 
@@ -103,7 +108,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="p-4">
-            <DuesList dues={filteredDues} onMarkPaid={handleMarkPaid} />
+            <DuesList dues={filteredDues} onMarkPaid={handleMarkPaid} onDelete={handleDelete} />
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import {
   getDuesByStatus,
   addDues,
   markAsPaid,
+  deleteDues,
 } from '@/lib/dues';
 
 describe('dues data layer', () => {
@@ -68,5 +69,17 @@ describe('dues data layer', () => {
     dues.push({} as any);
     const duesAgain = getDues();
     expect(duesAgain.length).not.toBe(dues.length);
+  });
+
+  it('deletes a dues entry', () => {
+    const result = deleteDues('1');
+    expect(result).toBe(true);
+    const dues = getDues();
+    expect(dues.find((d) => d.id === '1')).toBeUndefined();
+  });
+
+  it('returns false when deleting nonexistent entry', () => {
+    const result = deleteDues('nonexistent');
+    expect(result).toBe(false);
   });
 });
