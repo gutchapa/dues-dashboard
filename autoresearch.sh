@@ -26,11 +26,10 @@ else
   echo "METRIC build_time_s=0"
 fi
 
-# Step 5: Run tests — always run regardless of build (tests are independent)
+# Step 5: Run tests — use JSON reporter for reliable parsing
 TESTS_EXIT=0
-TESTS_OUTPUT=$(npx vitest run 2>&1) || TESTS_EXIT=$?
-TESTS_PASSED=$(echo "$TESTS_OUTPUT" | grep -oE 'Tests\s+[0-9]+ passed' | grep -oE '[0-9]+' | head -1 || echo "0")
-if [ -z "$TESTS_PASSED" ]; then TESTS_PASSED="0"; fi
+TESTS_OUTPUT=$(npx vitest run --reporter=json 2>/dev/null) || TESTS_EXIT=$?
+TESTS_PASSED=$(echo "$TESTS_OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('numPassedTests', 0))" 2>/dev/null || echo "0")
 
 # Primary metric: test_count (number of passing tests)
 echo "METRIC test_count=$TESTS_PASSED"
