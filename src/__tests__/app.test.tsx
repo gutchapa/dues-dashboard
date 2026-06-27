@@ -26,8 +26,10 @@ describe('App Pages', () => {
     const Home = (await import('../app/page')).default;
     const { container } = render(<Home />);
     expect(container).toBeTruthy();
-    // Should render the heading
-    expect(screen.getByText(/To get started/i)).toBeInTheDocument();
+    // Should render the dashboard heading
+    expect(screen.getByText('Dues Dashboard')).toBeInTheDocument();
+    // Should render the dues table
+    expect(screen.getByText('Rent')).toBeInTheDocument();
   });
 
   it('root layout exports metadata', async () => {
