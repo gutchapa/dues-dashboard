@@ -5,6 +5,7 @@ import { getDues, getTotalPending, addDues, markAsPaid, DuesStatus, DuesEntry } 
 import { DuesList } from '@/components/DuesList';
 import { DuesFilter } from '@/components/DuesFilter';
 import { DuesForm } from '@/components/DuesForm';
+import { DuesSearch } from '@/components/DuesSearch';
 
 function loadDues(): DuesEntry[] {
   try { return getDues(); } catch { return []; }
@@ -13,9 +14,13 @@ function loadDues(): DuesEntry[] {
 export default function Home() {
   const [filter, setFilter] = useState<DuesStatus | 'all'>('all');
   const [showForm, setShowForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [allDues, setAllDues] = useState<DuesEntry[]>(loadDues);
 
-  const filteredDues = filter === 'all' ? allDues : allDues.filter((d) => d.status === filter);
+  const statusFiltered = filter === 'all' ? allDues : allDues.filter((d) => d.status === filter);
+  const filteredDues = searchQuery
+    ? statusFiltered.filter((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : statusFiltered;
 
   const counts: Record<string, number> = {
     all: allDues.length,
@@ -86,6 +91,10 @@ export default function Home() {
             <DuesForm onSubmit={handleAddDues} />
           </div>
         )}
+
+        <div className="mb-4">
+          <DuesSearch value={searchQuery} onChange={setSearchQuery} />
+        </div>
 
         <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
           <div className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
