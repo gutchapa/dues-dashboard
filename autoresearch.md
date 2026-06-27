@@ -1,7 +1,7 @@
-# Autoresearch: Fix dues-dashboard Build & Tests
+# Autoresearch: Add dues-dashboard features with tests
 
 ## Objective
-Resolve all build errors, timeouts, and configuration issues in the Next.js dues-dashboard project. The app must build successfully and test cases must pass.
+Build real dues-dashboard features (dues list, CRUD operations, filtering/sorting) while maintaining build quality and test coverage. Each iteration adds meaningful functionality and corresponding tests.
 
 ## Tools Used in Loop Engg
 | Tool | Purpose |
@@ -15,17 +15,15 @@ Resolve all build errors, timeouts, and configuration issues in the Next.js dues
 | `log_experiment` | Record result (keep/discard) with ASI annotations |
 
 ## Termination Condition
-The loop terminates when ALL of:
+No hard termination — loop continues indefinitely, adding features and tests. Each iteration must:
 1. **Build passes** — `npm run build` exits with code 0, no errors
-2. **Test cases pass** — All project test cases run successfully
-
-Once both conditions are met, the loop stops and reports success.
+2. **Tests pass** — All existing tests must still pass (regression check)
+3. **New content added** — Feature, component, or test added
 
 ## Metrics
-- **Primary**: `build_ok` (0 or 1, higher is better) — 1 = build passes
-- **Secondary**: `build_time_s` (lower is better, once build works)
-- **Secondary**: `tests_ok` (0 or 1, higher is better) — 1 = tests pass
-- **Secondary**: `tests_count` (number of test cases that passed)
+- **Primary**: `test_count` (unitless, higher is better) — number of passing tests (proxy for feature completeness + quality)
+- **Secondary**: `build_ok` (0 or 1, higher is better) — must stay at 1
+- **Secondary**: `build_time_s` (lower is better) — must not regress significantly
 
 ## How to Run
 ```bash
@@ -36,14 +34,15 @@ Outputs `METRIC name=value` lines.
 ## Files in Scope
 | File | Purpose |
 |------|---------|
-| `package.json` | Dependencies and scripts — needs `@tailwindcss/postcss` added |
-| `postcss.config.mjs` | PostCSS plugin config — references `@tailwindcss/postcss` |
-| `tailwind.config.js` | Tailwind config — may need updates for v4 |
-| `next.config.ts` | Next.js config — may need `turbopack.root` to fix workspace warning |
-| `src/app/globals.css` | Global styles — uses `@import "tailwindcss"` (v4 syntax) |
+| `package.json` | Dependencies and scripts |
+| `postcss.config.mjs` | PostCSS plugin config |
+| `next.config.ts` | Next.js config |
+| `src/app/globals.css` | Global styles |
 | `src/app/layout.tsx` | Root layout |
 | `src/app/page.tsx` | Home page |
-| Any new test files added |
+| `src/components/*` | Reusable UI components |
+| `src/lib/*` | Data layer, hooks, utilities |
+| `src/__tests__/*` | Test files |
 
 ## Off Limits
 - `node_modules/` — never modify directly
@@ -51,28 +50,19 @@ Outputs `METRIC name=value` lines.
 
 ## Constraints
 - Must use `npm` (not pnpm/yarn)
-- Must not remove existing dependencies — only add what's missing
 - Build must complete without errors
-- All tests must pass
+- All tests must pass — never regress
+- New features must be accompanied by tests
 
-## Current Errors (Baseline)
-1. **Missing dependency**: `@tailwindcss/postcss` is not installed but required by `postcss.config.mjs`
-2. **npm workspace warning**: Next.js detects multiple lockfiles — suggests setting `turbopack.root`
-3. **Tailwind v4 config**: `tailwind.config.js` uses old v3 `module.exports` format, while `globals.css` uses new v4 `@import "tailwindcss"` syntax
+## What's Been Tried (Phase 1 — Fix Build)
 
-## What's Been Tried
-
-### Iteration 1 — ✅ SUCCESS: Build passes
-- **Problem**: npm install failed — eslint@8 incompatible with eslint-config-next@16 (needs >=9); @tailwindcss/postcss not installed
-- **Fix**: Upgraded eslint `^8`→`^9`, added `@tailwindcss/postcss ^4`
+### Iteration 1 — ✅ Build passes
+- **Fix**: Upgraded eslint `^8→^9`, added `@tailwindcss/postcss ^4`
 - **Result**: Build passes in ~2.1s
 
-### Iteration 2 — ✅ SUCCESS: Tests added & passing
-- **Added**: vitest, @testing-library/react, @testing-library/jest-dom, jsdom
-- **Added**: 2 tests (home page renders, layout exports metadata)
-- **Result**: All tests pass
+### Iteration 2 — ✅ Tests added
+- **Added**: vitest, testing-library, 2 smoke tests
+- **Result**: 2 tests pass
 
-## Final State
-- ✅ Build passes
-- ✅ 2 test cases pass
-- ✅ App is working
+## What's Been Tried (Phase 2 — Features)
+*(Filled as experiments accumulate)*

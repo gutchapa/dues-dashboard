@@ -32,12 +32,13 @@ TESTS_OUTPUT=$(npx vitest run 2>&1) || TESTS_EXIT=$?
 TESTS_PASSED=$(echo "$TESTS_OUTPUT" | grep -oE 'Tests\s+[0-9]+ passed' | grep -oE '[0-9]+' | head -1 || echo "0")
 if [ -z "$TESTS_PASSED" ]; then TESTS_PASSED="0"; fi
 
+# Primary metric: test_count (number of passing tests)
+echo "METRIC test_count=$TESTS_PASSED"
+
 if [ "$TESTS_EXIT" -eq 0 ]; then
   echo "METRIC tests_ok=1"
-  echo "METRIC tests_count=$TESTS_PASSED"
 else
   echo "METRIC tests_ok=0"
-  echo "METRIC tests_count=$TESTS_PASSED"
 fi
 
 # Print tail of build output for agent debugging
